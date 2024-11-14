@@ -1,8 +1,10 @@
-import { Modal, StyleSheet, Text, View, TouchableOpacity, TextInput } from "react-native";
+
 import React, { useState } from "react";
+import { Modal, StyleSheet, Text, View, TouchableOpacity, TextInput } from "react-native";
 import { FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import OneWay from "./One-way";
 import MultiCity from "./Multi-city";
+import { Calendar } from 'react-native-calendars';
 
 interface Iprops {
     modalVisible: boolean;
@@ -13,6 +15,13 @@ const CreateModal = (prop: Iprops) => {
     const { modalVisible, setModalVisible } = prop;
     const [oneWayModalVisible, setOneWayModalVisible] = useState(false);
     const [multiCityModalVisible, setMultiCityModalVisible] = useState(false);
+    const [calendarModalVisible, setCalendarModalVisible] = useState(false);  // State for calendar modal
+    const [selectedDate, setSelectedDate] = useState("");
+
+    const onDateSelect = (day: any) => {
+        setSelectedDate(day.dateString);
+        setCalendarModalVisible(false);
+    };
 
     return (
         <Modal
@@ -55,14 +64,13 @@ const CreateModal = (prop: Iprops) => {
                         <FontAwesome5 name="exchange-alt" size={20} color="gray" style={styles.iconRight} />
                     </View>
                     <View style={styles.dateContainer}>
-                        <View style={styles.dateWrapper}>
+                        <TouchableOpacity 
+                            style={styles.dateWrapper} 
+                            onPress={() => setCalendarModalVisible(true)}  // Open calendar modal on press
+                        >
                             <FontAwesome name="calendar" size={20} color="gray" style={styles.icon} />
-                            <TextInput placeholder="Fri, Jul 14" style={styles.input} placeholderTextColor="gray" />
-                        </View>
-                        <View style={styles.dateWrapper}>
-                            <FontAwesome name="calendar" size={20} color="gray" style={styles.icon} />
-                            <TextInput placeholder="Fri, Jul 14" style={styles.input} placeholderTextColor="gray" />
-                        </View>
+                            <Text style={styles.input}>{selectedDate || "Fri, Jul 14"}</Text>
+                        </TouchableOpacity>
                     </View>
                     <View style={styles.travellerContainer}>
                         <View style={styles.travellerInfo}>
@@ -81,6 +89,29 @@ const CreateModal = (prop: Iprops) => {
                     <Text style={styles.searchButtonText}>Search flights</Text>
                 </TouchableOpacity>
             </View>
+
+            {/* Calendar Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={calendarModalVisible}
+                onRequestClose={() => setCalendarModalVisible(false)}
+            >
+                <View style={styles.calendarContainer}>
+                    <Calendar
+                        onDayPress={onDateSelect}  // Select date and close modal
+                        markedDates={{
+                            [selectedDate]: { selected: true, selectedColor: '#00bcd4' }
+                        }}
+                    />
+                    <TouchableOpacity 
+                        onPress={() => setCalendarModalVisible(false)} 
+                        style={styles.closeCalendarButton}
+                    >
+                        <Text style={styles.closeButtonText}>Close</Text>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
 
             {/* Modal for One-way */}
             <Modal
@@ -198,12 +229,29 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingVertical: 12,
         alignItems: 'center',
-        marginLeft:17,
+        marginLeft: 17,
     },
     searchButtonText: {
         color: 'white',
         fontSize: 16,
         fontWeight: '600',
+    },
+    calendarContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    closeCalendarButton: {
+        alignSelf: 'center',
+        backgroundColor: '#00bcd4',
+        borderRadius: 8,
+        paddingVertical: 8,
+        paddingHorizontal: 20,
+        marginTop: 10,
+    },
+    closeButtonText: {
+        color: 'white',
+        fontSize: 16,
     },
 });
 

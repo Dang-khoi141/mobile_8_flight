@@ -1,12 +1,22 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Modal } from 'react-native';
 import { FontAwesome5, FontAwesome } from '@expo/vector-icons';
+import { Calendar } from 'react-native-calendars';
 
 interface IProps {
     onClose: () => void;
 }
 
 export default function OneWay({ onClose }: IProps) {
+    const [calendarModalVisible, setCalendarModalVisible] = useState(false);  // State for calendar modal
+    const [selectedDate, setSelectedDate] = useState("");  // State for selected date
+
+    const onDateSelect = (day: any) => {
+        setSelectedDate(day.dateString);  // Set selected date
+        setCalendarModalVisible(false);  // Close modal after date selection
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -38,10 +48,15 @@ export default function OneWay({ onClose }: IProps) {
                     <FontAwesome5 name="exchange-alt" size={20} color="gray" style={styles.iconRight} />
                 </View>
                 <View style={styles.dateContainer}>
-                    <View style={styles.dateWrapper}>
+                    <TouchableOpacity style={styles.dateWrapper} onPress={() => setCalendarModalVisible(true)}>
                         <FontAwesome name="calendar" size={20} color="gray" style={styles.icon} />
-                        <TextInput placeholder="Fri, Jul 14" style={styles.input} placeholderTextColor="gray" />
-                    </View>
+                        <TextInput
+                            value={selectedDate ? selectedDate : 'Fri, Jul 14'}
+                            style={styles.input}
+                            placeholderTextColor="gray"
+                            editable={false}  // Make TextInput non-editable to prevent manual date input
+                        />
+                    </TouchableOpacity>
                 </View>
                 <View style={styles.travellerContainer}>
                     <View style={styles.travellerInfo}>
@@ -57,6 +72,27 @@ export default function OneWay({ onClose }: IProps) {
             <TouchableOpacity style={styles.searchButton}>
                 <Text style={styles.searchButtonText}>Search flights</Text>
             </TouchableOpacity>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={calendarModalVisible}
+                onRequestClose={() => setCalendarModalVisible(false)}
+            >
+                <View style={styles.calendarContainer}>
+                    <Calendar
+                        onDayPress={onDateSelect}  // Select date and close modal
+                        markedDates={{
+                            [selectedDate]: { selected: true, selectedColor: '#00bcd4' }
+                        }}
+                    />
+                    <TouchableOpacity 
+                        onPress={() => setCalendarModalVisible(false)} 
+                        style={styles.closeCalendarButton}
+                    >
+                        <Text style={styles.closeButtonText}>Close</Text>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -156,5 +192,22 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         fontWeight: '600',
+    },
+    calendarContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    closeCalendarButton: {
+        alignSelf: 'center',
+        backgroundColor: '#00bcd4',
+        borderRadius: 8,
+        paddingVertical: 8,
+        paddingHorizontal: 20,
+        marginTop: 10,
+    },
+    closeButtonText: {
+        color: 'white',
+        fontSize: 16,
     },
 });

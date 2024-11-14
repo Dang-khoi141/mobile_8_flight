@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Modal } from 'react-native';
 import { FontAwesome5, FontAwesome } from '@expo/vector-icons';
+import { Calendar } from 'react-native-calendars';
 
 interface IProps {
     onClose: () => void;
 }
 
 export default function MultiCity({ onClose }: IProps) {
+    const [calendarModalVisible, setCalendarModalVisible] = useState(false);  // State for calendar modal
+    const [selectedFlightIndex, setSelectedFlightIndex] = useState<number | null>(null); // Track the flight index for date selection
+
     const [flights, setFlights] = useState([
         { from: '', to: '', date: '' },
         { from: '', to: '', date: '' },
@@ -20,6 +24,13 @@ export default function MultiCity({ onClose }: IProps) {
         const updatedFlights = [...flights];
         updatedFlights[index][field] = value;
         setFlights(updatedFlights);
+    };
+
+    const onDateSelect = (day: any) => {
+        if (selectedFlightIndex !== null) {
+            updateFlight(selectedFlightIndex, 'date', day.dateString);  // Update date for the specific flight
+            setCalendarModalVisible(false);
+        }
     };
 
     return (
@@ -52,15 +63,21 @@ export default function MultiCity({ onClose }: IProps) {
                             onChangeText={(text) => updateFlight(index, 'to', text)}
                         />
                     </View>
-                    <View style={styles.inputContainer}>
+                    <TouchableOpacity
+                        style={styles.inputContainer}
+                        onPress={() => {
+                            setSelectedFlightIndex(index);  // Set the current flight index
+                            setCalendarModalVisible(true);
+                        }}
+                    >
                         <FontAwesome name="calendar" size={20} color="gray" />
                         <TextInput
-                            placeholder="Fri, Jul 14"
+                            placeholder="Select date"
                             style={styles.input}
                             value={flight.date}
-                            onChangeText={(text) => updateFlight(index, 'date', text)}
+                            editable={false}  // Prevent direct editing
                         />
-                    </View>
+                    </TouchableOpacity>
                 </View>
             ))}
             <TouchableOpacity style={styles.addButton} onPress={addFlight}>
@@ -80,6 +97,28 @@ export default function MultiCity({ onClose }: IProps) {
             <TouchableOpacity style={styles.searchButton}>
                 <Text style={styles.searchButtonText}>Search flights</Text>
             </TouchableOpacity>
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={calendarModalVisible}
+                onRequestClose={() => setCalendarModalVisible(false)}
+            >
+                <View style={styles.calendarContainer}>
+                    <Calendar
+                        onDayPress={onDateSelect}  // Select date and close modal
+                        markedDates={{
+                            [flights[selectedFlightIndex || 0]?.date]: { selected: true, selectedColor: '#00bcd4' }
+                        }}
+                    />
+                    <TouchableOpacity 
+                        onPress={() => setCalendarModalVisible(false)} 
+                        style={styles.closeCalendarButton}
+                    >
+                        <Text style={styles.closeButtonText}>Close</Text>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -186,5 +225,22 @@ const styles = StyleSheet.create({
     },
     searchButtonText: {
         color: 'white',
+    },
+    calendarContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    closeCalendarButton: {
+        alignSelf: 'center',
+        backgroundColor: '#00bcd4',
+        borderRadius: 8,
+        paddingVertical: 8,
+        paddingHorizontal: 20,
+        marginTop: 10,
+    },
+    closeButtonText: {
+        color: 'white',
+        fontSize: 16,
     },
 });
