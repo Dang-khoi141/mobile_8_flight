@@ -5,6 +5,9 @@ import { FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import OneWay from "./One-way";
 import MultiCity from "./Multi-city";
 import { Calendar } from 'react-native-calendars';
+import CreateModalWhereTo from "./ModalWhereTo";
+import CreateModalWhereFrom from "./ModalWhereFrom";
+import CreateModalTravellerOptions from "./ModalTraveller";
 
 interface Iprops {
     modalVisible: boolean;
@@ -16,7 +19,16 @@ const CreateModal = (prop: Iprops) => {
     const [oneWayModalVisible, setOneWayModalVisible] = useState(false);
     const [multiCityModalVisible, setMultiCityModalVisible] = useState(false);
     const [calendarModalVisible, setCalendarModalVisible] = useState(false);  // State for calendar modal
+    const [selectedDateFrom, setSelectedDateFrom] = useState("");
     const [selectedDate, setSelectedDate] = useState("");
+    const [modalVisibleFrom, setModalVisibleFrom] = useState(false);
+    const [modalVisibleTo, setModalVisibleTo] = useState(false);
+    const [travellerModalVisible, setTravellerModalVisible] = useState(false);
+
+    const onDateSelectFrom = (day: any) => {
+        setSelectedDateFrom(day.dateString);
+        setCalendarModalVisible(false);
+    };
 
     const onDateSelect = (day: any) => {
         setSelectedDate(day.dateString);
@@ -54,34 +66,56 @@ const CreateModal = (prop: Iprops) => {
 
                 {/* Input Fields */}
                 <View style={styles.inputContainer}>
-                    <View style={styles.inputWrapper}>
-                        <FontAwesome5 name="plane-departure" size={20} color="gray" style={styles.icon} />
-                        <TextInput placeholder="From" style={styles.input} placeholderTextColor="gray" />
-                    </View>
-                    <View style={styles.inputWrapper}>
-                        <FontAwesome5 name="plane-arrival" size={20} color="gray" style={styles.icon} />
-                        <TextInput placeholder="To" style={styles.input} placeholderTextColor="gray" />
+                    <TouchableOpacity style={styles.inputWrapper}
+                   >
+                        <FontAwesome5 name="plane-departure" size={20} color="gray" style={styles.icon} 
+                        onFocus={() => setModalVisibleFrom(true)}/>
+                        <TextInput placeholder="From" style={styles.input} placeholderTextColor="gray"
+                        onFocus={() => setModalVisibleFrom(true)}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.inputWrapper}
+                    >
+                        <FontAwesome5 name="plane-arrival" size={20} color="gray" style={styles.icon}  
+                        onFocus={() => setModalVisibleTo(true)}/>
+                        <TextInput placeholder="To" style={styles.input} placeholderTextColor="gray" 
+                        onFocus={() => setModalVisibleTo(true)}
+                        />
                         <FontAwesome5 name="exchange-alt" size={20} color="gray" style={styles.iconRight} />
-                    </View>
+                    </TouchableOpacity>
                     <View style={styles.dateContainer}>
-                        <TouchableOpacity 
-                            style={styles.dateWrapper} 
+                        {/* Ngày đi */}
+                        <TouchableOpacity
+                            style={styles.dateWrapper}
+                            onPress={() => setCalendarModalVisible(true)}  // Open calendar modal on press
+                        >
+                            <FontAwesome name="calendar" size={20} color="gray" style={styles.icon} />
+                            <Text style={styles.input}>{selectedDateFrom || "Fri, Jul 14"}</Text>
+                        </TouchableOpacity>
+
+                        {/* Ngày về */}
+                        <TouchableOpacity
+                            style={styles.dateWrapper}
                             onPress={() => setCalendarModalVisible(true)}  // Open calendar modal on press
                         >
                             <FontAwesome name="calendar" size={20} color="gray" style={styles.icon} />
                             <Text style={styles.input}>{selectedDate || "Fri, Jul 14"}</Text>
                         </TouchableOpacity>
+
                     </View>
                     <View style={styles.travellerContainer}>
-                        <View style={styles.travellerInfo}>
-                            <FontAwesome name="user" size={20} color="gray" />
-                            <Text style={styles.travellerText}>1 traveller</Text>
-                            <Text style={styles.travellerText}>·</Text>
-                            <FontAwesome name="briefcase" size={20} color="gray" />
-                            <Text style={styles.travellerText}>Economy</Text>
-                        </View>
-                        <FontAwesome name="chevron-down" size={20} color="gray" />
-                    </View>
+                <TouchableOpacity 
+                    style={styles.travellerInfo}
+                    onPress={() => setTravellerModalVisible(true)} // Mở modal khi nhấn
+                >
+                    <FontAwesome name="user" size={20} color="gray" />
+                    <Text style={styles.travellerText}>1 traveller</Text>
+                    <Text style={styles.travellerText}>·</Text>
+                    <FontAwesome name="briefcase" size={20} color="gray" />
+                    <Text style={styles.travellerText}>Economy</Text>
+                </TouchableOpacity>
+                <FontAwesome name="chevron-down" size={20} color="gray" />
+            </View>
                 </View>
 
                 {/* Search Button */}
@@ -99,13 +133,20 @@ const CreateModal = (prop: Iprops) => {
             >
                 <View style={styles.calendarContainer}>
                     <Calendar
+                        onDayPress={onDateSelectFrom}  // Select date and close modal
+                        markedDates={{
+                            [selectedDateFrom]: { selected: true, selectedColor: '#00bcd4' }
+                        }}
+                    />
+
+                    <Calendar
                         onDayPress={onDateSelect}  // Select date and close modal
                         markedDates={{
                             [selectedDate]: { selected: true, selectedColor: '#00bcd4' }
                         }}
                     />
-                    <TouchableOpacity 
-                        onPress={() => setCalendarModalVisible(false)} 
+                    <TouchableOpacity
+                        onPress={() => setCalendarModalVisible(false)}
                         style={styles.closeCalendarButton}
                     >
                         <Text style={styles.closeButtonText}>Close</Text>
@@ -132,6 +173,34 @@ const CreateModal = (prop: Iprops) => {
             >
                 <MultiCity onClose={() => setMultiCityModalVisible(false)} />
             </Modal>
+
+            {/* Modal where to */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisibleTo}
+                onRequestClose={() => setModalVisibleTo(false)}
+            >
+                <CreateModalWhereTo onClose={() => setModalVisibleTo(false)} />
+            </Modal>
+             {/* Modal where from */}
+             <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisibleFrom}
+                onRequestClose={() => setModalVisibleFrom(false)}
+            >
+                <CreateModalWhereFrom onClose={() => setModalVisibleFrom(false)} />
+            </Modal>
+              {/* Modal cho lựa chọn hành khách */}
+              <Modal
+                animationType="slide"
+                transparent={true}
+                visible={travellerModalVisible}
+                onRequestClose={() => setTravellerModalVisible(false)}
+            >
+                <CreateModalTravellerOptions onClose={() => setTravellerModalVisible(false)} />
+            </Modal>
         </Modal>
     );
 }
@@ -139,7 +208,7 @@ const CreateModal = (prop: Iprops) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'white', 
+        backgroundColor: 'white',
         padding: 16,
     },
     header: {

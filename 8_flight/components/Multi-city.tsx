@@ -130,6 +130,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         padding: 16,
+       
     },
     header: {
         flexDirection: 'row',

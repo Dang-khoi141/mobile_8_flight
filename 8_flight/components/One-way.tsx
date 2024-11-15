@@ -27,15 +27,11 @@ export default function OneWay({ onClose }: IProps) {
                 <View style={{ width: 24 }}></View>
             </View>
             <View style={styles.tabContainer}>
-                <TouchableOpacity>
-                    <Text style={styles.inactiveTabText}>Round-trip</Text>
-                </TouchableOpacity>
+                
                 <TouchableOpacity style={styles.activeTab}>
                     <Text style={styles.activeTabText}>One-way</Text>
                 </TouchableOpacity>
-                <TouchableOpacity>
-                    <Text style={styles.inactiveTabText}>Multi-city</Text>
-                </TouchableOpacity>
+                
             </View>
             <View style={styles.inputContainer}>
                 <View style={styles.inputWrapper}>
